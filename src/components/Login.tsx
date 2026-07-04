@@ -23,7 +23,12 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         body: JSON.stringify({ username, password }),
       });
 
-      const data = await res.json();
+      let data: any = {};
+      try {
+        data = await res.json();
+      } catch (jsonErr) {
+        throw new Error("Gagal membaca respon dari server. Silakan coba lagi.");
+      }
 
       if (!res.ok) {
         throw new Error(data.error || "Gagal masuk. Periksa kembali username dan password.");

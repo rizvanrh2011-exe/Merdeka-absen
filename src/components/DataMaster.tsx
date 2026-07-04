@@ -199,8 +199,14 @@ export default function DataMaster({ db, currentUser, onRefresh }: DataMasterPro
       }
       const res = await fetch(endpoint, { method: "DELETE" });
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Gagal menghapus data");
+        let errorMsg = "Gagal menghapus data";
+        try {
+          const errorData = await res.json();
+          errorMsg = errorData.error || errorMsg;
+        } catch (e) {
+          // Fallback if not valid JSON
+        }
+        throw new Error(errorMsg);
       }
       showMsg("Data berhasil dihapus!");
       onRefresh();
