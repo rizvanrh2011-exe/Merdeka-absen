@@ -148,8 +148,42 @@ async function handleMockApi(url: string, init?: RequestInit): Promise<Response>
         id: found.id,
         nama: found.nama,
         username: found.username,
-        role: found.role
+        role: found.role,
+        sekolah_id: found.sekolah_id || "default"
       }
+    }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+
+  // 2b. POST /api/register-sekolah
+  if (path === "/api/register-sekolah" && method === "POST") {
+    const { nama_sekolah, kode_sekolah, nama_admin, username, password, kode_aktivasi } = getBody();
+    
+    if (!kode_aktivasi) {
+      return new Response(JSON.stringify({ error: "Kode Aktivasi wajib diisi!" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    // Add new administrator guru with specified school id to mock db
+    const newGuru: any = {
+      id: "g_" + Date.now(),
+      nama: nama_admin,
+      username: username,
+      password: password,
+      role: "wali_kelas",
+      sekolah_id: kode_sekolah || "default"
+    };
+    
+    db.guru.push(newGuru);
+    saveLocalDb(db);
+    
+    return new Response(JSON.stringify({
+      success: true,
+      sekolah_id: kode_sekolah || "default"
     }), {
       status: 200,
       headers: { "Content-Type": "application/json" }
@@ -513,6 +547,7 @@ export async function registerSekolah(payload: {
   nama_admin: string;
   username: string;
   password: string;
+  kode_aktivasi: string;
 }) {
   const res = await fetch(`${API_BASE}/api/register-sekolah`, {
     method: "POST",
@@ -669,5 +704,41 @@ export async function saveNilaiBulk(payload: {
     body: JSON.stringify(payload),
   });
   if (!res.ok) throw new Error("Gagal menyimpan nilai");
+  return res.json();
+}
+
+// -------------------------------------------------------------
+// OWNER ACTIVATION CODE SERVICE
+// -------------------------------------------------------------
+export async function getActivationCodes() {
+  const res = await fetch(`${API_BASE}/api/owner/activation-codes`);
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || "Gagal mengambil kode aktivasi");
+  }
+  return res.json() as Promise<any[]>;
+}
+
+export async function generateActivationCodes(count: number) {
+  const res = await fetch(`${API_BASE}/api/owner/activation-codes/generate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ count }),
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || "Gagal membuat kode aktivasi");
+  }
+  return res.json();
+}
+
+export async function deleteActivationCode(code: string) {
+  const res = await fetch(`${API_BASE}/api/owner/activation-codes/${encodeURIComponent(code)}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || "Gagal menghapus kode aktivasi");
+  }
   return res.json();
 }

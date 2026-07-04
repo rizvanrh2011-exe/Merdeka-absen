@@ -6,6 +6,7 @@ import DataMaster from "./components/DataMaster";
 import AbsensiEditor from "./components/AbsensiEditor";
 import NilaiEditor from "./components/NilaiEditor";
 import RaporViewer from "./components/RaporViewer";
+import ActivationCodeManager from "./components/ActivationCodeManager";
 import Login from "./components/Login";
 import {
   GraduationCap,
@@ -18,7 +19,8 @@ import {
   Menu,
   X,
   RefreshCw,
-  Calendar
+  Calendar,
+  Key
 } from "lucide-react";
 
 export default function App() {
@@ -27,6 +29,7 @@ export default function App() {
     nama: string;
     username: string;
     role: Role;
+    sekolah_id?: string;
   } | null>(null);
 
   const [db, setDb] = useState<DatabaseState | null>(null);
@@ -34,6 +37,8 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const isOwner = currentUser?.sekolah_id === "default" && currentUser?.username === "admin";
 
   // Load user from storage on mount
   useEffect(() => {
@@ -193,6 +198,19 @@ export default function App() {
           >
             <FileText className="w-4 h-4" /> E-Rapor
           </button>
+
+          {isOwner && (
+            <button
+              onClick={() => setActiveScreen("owner")}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                activeScreen === "owner"
+                  ? "bg-amber-800 text-white shadow-sm font-bold border-l-4 border-amber-400"
+                  : "text-amber-100 hover:bg-amber-800/45"
+              }`}
+            >
+              <Key className="w-4 h-4 text-amber-300" /> Kelola Lisensi (Owner)
+            </button>
+          )}
         </nav>
 
         {/* User profile at the bottom */}
@@ -292,6 +310,20 @@ export default function App() {
               >
                 <FileText className="w-4 h-4" /> E-Rapor
               </button>
+
+              {isOwner && (
+                <button
+                  onClick={() => {
+                    setActiveScreen("owner");
+                    setSidebarOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium ${
+                    activeScreen === "owner" ? "bg-amber-800 text-white font-bold" : "text-amber-100 hover:bg-amber-800/30"
+                  }`}
+                >
+                  <Key className="w-4 h-4 text-amber-400" /> Kelola Lisensi (Owner)
+                </button>
+              )}
             </nav>
 
             <div className="p-4 border-t border-green-850 bg-green-950/40 space-y-3">
@@ -382,6 +414,9 @@ export default function App() {
           )}
           {activeScreen === "rapor" && (
             <RaporViewer db={db} currentUser={currentUser} />
+          )}
+          {activeScreen === "owner" && isOwner && (
+            <ActivationCodeManager />
           )}
         </main>
       </div>

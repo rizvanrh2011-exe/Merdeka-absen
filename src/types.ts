@@ -27,6 +27,7 @@ export interface Guru {
   username: string;
   password?: string; // only for login/saving
   role: Role;
+  sekolah_id?: string;
 }
 
 export interface GuruMapelKelas {

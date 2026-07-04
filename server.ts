@@ -1,7 +1,6 @@
 import express from "express";
 import path from "path";
 import fs from "fs";
-import { createServer as createViteServer } from "vite";
 import { initializeApp } from "firebase/app";
 import { 
   getFirestore, 
@@ -295,10 +294,10 @@ async function startServer() {
 
   // API: Register New School (Multi-Tenant)
   app.post("/api/register-sekolah", async (req, res) => {
-    const { nama_sekolah, kode_sekolah, nama_admin, username, password } = req.body;
+    const { nama_sekolah, kode_sekolah, nama_admin, username, password, kode_aktivasi } = req.body;
     
-    if (!nama_sekolah || !kode_sekolah || !nama_admin || !username || !password) {
-      return res.status(400).json({ error: "Semua field pendaftaran harus diisi!" });
+    if (!nama_sekolah || !kode_sekolah || !nama_admin || !username || !password || !kode_aktivasi) {
+      return res.status(400).json({ error: "Semua field pendaftaran termasuk Kode Aktivasi harus diisi!" });
     }
 
     const cleanKode = kode_sekolah.trim().toLowerCase().replace(/[^a-z0-9_-]/g, "");
@@ -315,6 +314,20 @@ async function startServer() {
     }
 
     try {
+      // Validate Activation Code
+      const cleanAktivasi = kode_aktivasi.trim().toUpperCase();
+      const codeRef = doc(firestoreDb, "kode_aktivasi", cleanAktivasi);
+      const codeSnap = await getDoc(codeRef);
+
+      if (!codeSnap.exists()) {
+        return res.status(400).json({ error: "Kode Aktivasi tidak valid atau tidak terdaftar!" });
+      }
+
+      const codeData = codeSnap.data();
+      if (codeData.status !== "active") {
+        return res.status(400).json({ error: "Kode Aktivasi sudah digunakan oleh sekolah lain!" });
+      }
+
       const schoolRef = doc(firestoreDb, "sekolah", cleanKode);
       const schoolSnap = await getDoc(schoolRef);
       if (schoolSnap.exists()) {
@@ -337,6 +350,14 @@ async function startServer() {
         role: "wali_kelas"
       });
 
+      // Mark Activation Code as used
+      await setDoc(codeRef, {
+        status: "used",
+        used_by_sekolah: cleanKode,
+        used_by_nama_sekolah: nama_sekolah.trim(),
+        used_at: new Date().toISOString()
+      }, { merge: true });
+
       // Seed default sandbox data for instant play
       await seedDefaultSchoolData(cleanKode, nama_admin.trim());
 
@@ -344,6 +365,83 @@ async function startServer() {
     } catch (err: any) {
       console.error("Error registering school:", err);
       res.status(500).json({ error: "Gagal mendaftarkan sekolah: " + err.message });
+    }
+  });
+
+  // API: Get all activation codes (Super Admin Owner only)
+  app.get("/api/owner/activation-codes", async (req, res) => {
+    const sekolahId = (req.headers["x-sekolah-id"] as string) || "default";
+    if (sekolahId !== "default") {
+      return res.status(403).json({ error: "Akses ditolak" });
+    }
+    if (!firestoreDb) {
+      return res.status(500).json({ error: "Database tidak terhubung" });
+    }
+    try {
+      const snap = await getDocs(collection(firestoreDb, "kode_aktivasi"));
+      const codes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      res.json(codes);
+    } catch (err: any) {
+      console.error("Error fetching codes:", err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // API: Generate new activation codes
+  app.post("/api/owner/activation-codes/generate", async (req, res) => {
+    const sekolahId = (req.headers["x-sekolah-id"] as string) || "default";
+    if (sekolahId !== "default") {
+      return res.status(403).json({ error: "Akses ditolak" });
+    }
+    if (!firestoreDb) {
+      return res.status(500).json({ error: "Database tidak terhubung" });
+    }
+    const { count } = req.body;
+    const numToGen = Math.min(Math.max(Number(count) || 1, 1), 50);
+
+    try {
+      const generated = [];
+      for (let i = 0; i < numToGen; i++) {
+        // Generate nice custom format: GP-XXXX-XXXX-XXXX
+        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // clear readable alpha-numeric, excluding confusing characters (0, O, 1, I)
+        const genPart = (len: number) => {
+          let part = "";
+          for (let k = 0; k < len; k++) {
+            part += chars.charAt(Math.floor(Math.random() * chars.length));
+          }
+          return part;
+        };
+        const code = `GP-${genPart(4)}-${genPart(4)}-${genPart(4)}`;
+        
+        await setDoc(doc(firestoreDb, "kode_aktivasi", code), {
+          code,
+          status: "active",
+          created_at: new Date().toISOString()
+        });
+        generated.push(code);
+      }
+      res.json({ success: true, codes: generated });
+    } catch (err: any) {
+      console.error("Error generating codes:", err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // API: Delete activation code
+  app.delete("/api/owner/activation-codes/:code", async (req, res) => {
+    const sekolahId = (req.headers["x-sekolah-id"] as string) || "default";
+    if (sekolahId !== "default") {
+      return res.status(403).json({ error: "Akses ditolak" });
+    }
+    if (!firestoreDb) {
+      return res.status(500).json({ error: "Database tidak terhubung" });
+    }
+    const { code } = req.params;
+    try {
+      await deleteDoc(doc(firestoreDb, "kode_aktivasi", code));
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
     }
   });
 
@@ -898,6 +996,7 @@ async function startServer() {
 
   // Vite integration
   if (process.env.NODE_ENV !== "production") {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",

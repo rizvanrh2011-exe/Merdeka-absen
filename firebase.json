@@ -1,0 +1,12 @@
+{
+  "firestore": [
+    {
+      "database": "(default)",
+      "rules": "firestore.rules"
+    },
+    {
+      "database": "ai-studio-administrasiguru-41a933d7-33eb-4bcb-b149-04f4ce1d22df",
+      "rules": "firestore.rules"
+    }
+  ]
+}

@@ -36,6 +36,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const [regUsername, setRegUsername] = useState("");
   const [regPassword, setRegPassword] = useState("");
   const [regConfirmPassword, setRegConfirmPassword] = useState("");
+  const [regKodeAktivasi, setRegKodeAktivasi] = useState("");
   
   // Status State
   const [error, setError] = useState<string | null>(null);
@@ -76,8 +77,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     setLoading(true);
 
     try {
-      if (!regNamaSekolah.trim() || !regKodeSekolah.trim() || !regNamaAdmin.trim() || !regUsername.trim() || !regPassword) {
-        throw new Error("Semua kolom pendaftaran wajib diisi!");
+      if (!regNamaSekolah.trim() || !regKodeSekolah.trim() || !regNamaAdmin.trim() || !regUsername.trim() || !regPassword || !regKodeAktivasi.trim()) {
+        throw new Error("Semua kolom pendaftaran termasuk Kode Aktivasi wajib diisi!");
       }
       
       if (regPassword !== regConfirmPassword) {
@@ -94,7 +95,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         kode_sekolah: cleanKode,
         nama_admin: regNamaAdmin.trim(),
         username: regUsername.trim(),
-        password: regPassword
+        password: regPassword,
+        kode_aktivasi: regKodeAktivasi.trim()
       });
 
       setSuccessMessage(`Sekolah '${regNamaSekolah}' berhasil terdaftar! Gunakan Kode Sekolah '${res.sekolah_id}' untuk masuk.`);
@@ -111,6 +113,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       setRegUsername("");
       setRegPassword("");
       setRegConfirmPassword("");
+      setRegKodeAktivasi("");
       
       // Switch tab
       setActiveTab("login");
@@ -272,6 +275,23 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             {/* TAB: REGISTER FORM */}
             {activeTab === "register" && (
               <form className="space-y-4" onSubmit={handleRegisterSubmit}>
+                <div>
+                  <label className="block text-xs font-bold text-amber-700 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <Key className="w-3.5 h-3.5 text-amber-600" /> Kode Aktivasi Aplikasi (Lisensi)
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={regKodeAktivasi}
+                    onChange={(e) => setRegKodeAktivasi(e.target.value.toUpperCase())}
+                    className="block w-full bg-amber-50/40 border border-amber-300 text-slate-850 rounded-lg px-3 py-2 text-sm focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 outline-none transition font-mono uppercase placeholder:text-amber-300"
+                    placeholder="GP-XXXX-XXXX-XXXX"
+                  />
+                  <p className="mt-1 text-[10px] text-amber-700">
+                    Masukkan kode lisensi resmi yang Anda beli melalui <span className="font-bold underline text-amber-800">lynk.id</span> atau dari Developer.
+                  </p>
+                </div>
+
                 <div>
                   <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
                     Nama Sekolah
