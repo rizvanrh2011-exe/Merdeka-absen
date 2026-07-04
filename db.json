@@ -1,0 +1,616 @@
+{
+  "settings": {
+    "tahun_ajaran": "2025/2026",
+    "semester": "Ganjil"
+  },
+  "kelas": [
+    {
+      "id": "k_9a",
+      "nama_kelas": "Kelas 9-A",
+      "wali_kelas": "Drs. Budi Santoso"
+    }
+  ],
+  "siswa": [
+    {
+      "id": "s1",
+      "nama": "ADITYA",
+      "NISN": "0081234561",
+      "kelas_id": "k_9a",
+      "jenis_kelamin": "L",
+      "dibuat_oleh": "g_admin"
+    },
+    {
+      "id": "s2",
+      "nama": "ALFINO",
+      "NISN": "0081234562",
+      "kelas_id": "k_9a",
+      "jenis_kelamin": "L",
+      "dibuat_oleh": "g_admin"
+    },
+    {
+      "id": "s3",
+      "nama": "ANGGUN",
+      "NISN": "0081234563",
+      "kelas_id": "k_9a",
+      "jenis_kelamin": "P",
+      "dibuat_oleh": "g_admin"
+    },
+    {
+      "id": "s4",
+      "nama": "BALQIS HUMAIRAO SINAGA",
+      "NISN": "0081234564",
+      "kelas_id": "k_9a",
+      "jenis_kelamin": "P",
+      "dibuat_oleh": "g_admin"
+    },
+    {
+      "id": "s5",
+      "nama": "KHAIRANI SYAHVIRA",
+      "NISN": "0081234565",
+      "kelas_id": "k_9a",
+      "jenis_kelamin": "P",
+      "dibuat_oleh": "g_admin"
+    },
+    {
+      "id": "s6",
+      "nama": "MUHAMMAD NAJRIL",
+      "NISN": "0081234566",
+      "kelas_id": "k_9a",
+      "jenis_kelamin": "L",
+      "dibuat_oleh": "g_admin"
+    },
+    {
+      "id": "s7",
+      "nama": "NURUL CIKYTA",
+      "NISN": "0081234567",
+      "kelas_id": "k_9a",
+      "jenis_kelamin": "P",
+      "dibuat_oleh": "g_admin"
+    },
+    {
+      "id": "s8",
+      "nama": "SABRINA TASYA",
+      "NISN": "0081234568",
+      "kelas_id": "k_9a",
+      "jenis_kelamin": "P",
+      "dibuat_oleh": "g_admin"
+    },
+    {
+      "id": "s9",
+      "nama": "ZURNI SOFIA",
+      "NISN": "0081234569",
+      "kelas_id": "k_9a",
+      "jenis_kelamin": "P",
+      "dibuat_oleh": "g_admin"
+    }
+  ],
+  "mata_pelajaran": [
+    {
+      "id": "mp_mat",
+      "nama": "Matematika",
+      "KKM": 75
+    },
+    {
+      "id": "mp_ind",
+      "nama": "Bahasa Indonesia",
+      "KKM": 75
+    },
+    {
+      "id": "mp_ipa",
+      "nama": "IPA (Sains)",
+      "KKM": 75
+    },
+    {
+      "id": "mp_ips",
+      "nama": "IPS (Sosial)",
+      "KKM": 70
+    },
+    {
+      "id": "mp_ing",
+      "nama": "Bahasa Inggris",
+      "KKM": 72
+    },
+    {
+      "id": "mp_ppn",
+      "nama": "Pendidikan Pancasila",
+      "KKM": 75
+    }
+  ],
+  "guru": [
+    {
+      "id": "g_admin",
+      "nama": "Drs. Budi Santoso",
+      "username": "admin",
+      "password": "admin",
+      "role": "wali_kelas"
+    },
+    {
+      "id": "g_guru1",
+      "nama": "Siti Aminah, S.Pd.",
+      "username": "guru1",
+      "password": "guru1",
+      "role": "guru_mapel"
+    },
+    {
+      "id": "g_guru2",
+      "nama": "Rian Hidayat, M.Si.",
+      "username": "guru2",
+      "password": "guru2",
+      "role": "guru_mapel"
+    },
+    {
+      "id": "g_1782996919778",
+      "nama": "Mirawati, S.Pd.I",
+      "username": "mira",
+      "role": "guru_mapel",
+      "password": "123"
+    }
+  ],
+  "guru_mapel_kelas": [
+    {
+      "id": "gmk1",
+      "guru_id": "g_admin",
+      "mapel_id": "mp_ppn",
+      "kelas_id": "k_9a"
+    },
+    {
+      "id": "gmk2",
+      "guru_id": "g_admin",
+      "mapel_id": "mp_ind",
+      "kelas_id": "k_9a"
+    },
+    {
+      "id": "gmk3",
+      "guru_id": "g_guru1",
+      "mapel_id": "mp_mat",
+      "kelas_id": "k_9a"
+    },
+    {
+      "id": "gmk4",
+      "guru_id": "g_guru1",
+      "mapel_id": "mp_ing",
+      "kelas_id": "k_9a"
+    },
+    {
+      "id": "gmk5",
+      "guru_id": "g_guru2",
+      "mapel_id": "mp_ipa",
+      "kelas_id": "k_9a"
+    },
+    {
+      "id": "gmk6",
+      "guru_id": "g_guru2",
+      "mapel_id": "mp_ips",
+      "kelas_id": "k_9a"
+    }
+  ],
+  "absensi": [
+    {
+      "id": "a1",
+      "siswa_id": "s1",
+      "tanggal": "2026-07-01",
+      "status": "Hadir"
+    },
+    {
+      "id": "a2",
+      "siswa_id": "s2",
+      "tanggal": "2026-07-01",
+      "status": "Hadir"
+    },
+    {
+      "id": "a3",
+      "siswa_id": "s3",
+      "tanggal": "2026-07-01",
+      "status": "Sakit"
+    },
+    {
+      "id": "a4",
+      "siswa_id": "s4",
+      "tanggal": "2026-07-01",
+      "status": "Hadir"
+    },
+    {
+      "id": "a5",
+      "siswa_id": "s5",
+      "tanggal": "2026-07-01",
+      "status": "Izin"
+    },
+    {
+      "id": "a6",
+      "siswa_id": "s6",
+      "tanggal": "2026-07-01",
+      "status": "Hadir"
+    },
+    {
+      "id": "a7",
+      "siswa_id": "s7",
+      "tanggal": "2026-07-01",
+      "status": "Hadir"
+    },
+    {
+      "id": "a8",
+      "siswa_id": "s8",
+      "tanggal": "2026-07-01",
+      "status": "Hadir"
+    },
+    {
+      "id": "a9",
+      "siswa_id": "s9",
+      "tanggal": "2026-07-01",
+      "status": "Hadir"
+    },
+    {
+      "id": "a10",
+      "siswa_id": "s1",
+      "tanggal": "2026-07-02",
+      "status": "Hadir"
+    },
+    {
+      "id": "a11",
+      "siswa_id": "s2",
+      "tanggal": "2026-07-02",
+      "status": "Hadir"
+    },
+    {
+      "id": "a12",
+      "siswa_id": "s3",
+      "tanggal": "2026-07-02",
+      "status": "Hadir"
+    },
+    {
+      "id": "a13",
+      "siswa_id": "s4",
+      "tanggal": "2026-07-02",
+      "status": "Hadir"
+    },
+    {
+      "id": "a14",
+      "siswa_id": "s5",
+      "tanggal": "2026-07-02",
+      "status": "Hadir"
+    },
+    {
+      "id": "a15",
+      "siswa_id": "s6",
+      "tanggal": "2026-07-02",
+      "status": "Sakit"
+    },
+    {
+      "id": "a16",
+      "siswa_id": "s7",
+      "tanggal": "2026-07-02",
+      "status": "Hadir"
+    },
+    {
+      "id": "a17",
+      "siswa_id": "s8",
+      "tanggal": "2026-07-02",
+      "status": "Alpa"
+    },
+    {
+      "id": "a18",
+      "siswa_id": "s9",
+      "tanggal": "2026-07-02",
+      "status": "Hadir"
+    }
+  ],
+  "nilai": [
+    {
+      "id": "n1",
+      "siswa_id": "s1",
+      "mapel_id": "mp_mat",
+      "jenis": "UH",
+      "nilai": 85,
+      "urutan_UH": 1,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_guru1"
+    },
+    {
+      "id": "n2",
+      "siswa_id": "s2",
+      "mapel_id": "mp_mat",
+      "jenis": "UH",
+      "nilai": 72,
+      "urutan_UH": 1,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_guru1"
+    },
+    {
+      "id": "n3",
+      "siswa_id": "s3",
+      "mapel_id": "mp_mat",
+      "jenis": "UH",
+      "nilai": 90,
+      "urutan_UH": 1,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_guru1"
+    },
+    {
+      "id": "n4",
+      "siswa_id": "s4",
+      "mapel_id": "mp_mat",
+      "jenis": "UH",
+      "nilai": 68,
+      "urutan_UH": 1,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_guru1"
+    },
+    {
+      "id": "n5",
+      "siswa_id": "s5",
+      "mapel_id": "mp_mat",
+      "jenis": "UH",
+      "nilai": 80,
+      "urutan_UH": 1,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_guru1"
+    },
+    {
+      "id": "n6",
+      "siswa_id": "s6",
+      "mapel_id": "mp_mat",
+      "jenis": "UH",
+      "nilai": 74,
+      "urutan_UH": 1,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_guru1"
+    },
+    {
+      "id": "n7",
+      "siswa_id": "s7",
+      "mapel_id": "mp_mat",
+      "jenis": "UH",
+      "nilai": 95,
+      "urutan_UH": 1,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_guru1"
+    },
+    {
+      "id": "n8",
+      "siswa_id": "s8",
+      "mapel_id": "mp_mat",
+      "jenis": "UH",
+      "nilai": 60,
+      "urutan_UH": 1,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_guru1"
+    },
+    {
+      "id": "n9",
+      "siswa_id": "s9",
+      "mapel_id": "mp_mat",
+      "jenis": "UH",
+      "nilai": 88,
+      "urutan_UH": 1,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_guru1"
+    },
+    {
+      "id": "n10",
+      "siswa_id": "s1",
+      "mapel_id": "mp_mat",
+      "jenis": "UH",
+      "nilai": 78,
+      "urutan_UH": 2,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_guru1"
+    },
+    {
+      "id": "n11",
+      "siswa_id": "s2",
+      "mapel_id": "mp_mat",
+      "jenis": "UH",
+      "nilai": 80,
+      "urutan_UH": 2,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_guru1"
+    },
+    {
+      "id": "n12",
+      "siswa_id": "s3",
+      "mapel_id": "mp_mat",
+      "jenis": "UH",
+      "nilai": 88,
+      "urutan_UH": 2,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_guru1"
+    },
+    {
+      "id": "n13",
+      "siswa_id": "s4",
+      "mapel_id": "mp_mat",
+      "jenis": "UH",
+      "nilai": 70,
+      "urutan_UH": 2,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_guru1"
+    },
+    {
+      "id": "n14",
+      "siswa_id": "s5",
+      "mapel_id": "mp_mat",
+      "jenis": "UH",
+      "nilai": 85,
+      "urutan_UH": 2,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_guru1"
+    },
+    {
+      "id": "n15",
+      "siswa_id": "s6",
+      "mapel_id": "mp_mat",
+      "jenis": "UH",
+      "nilai": 80,
+      "urutan_UH": 2,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_guru1"
+    },
+    {
+      "id": "n16",
+      "siswa_id": "s7",
+      "mapel_id": "mp_mat",
+      "jenis": "UH",
+      "nilai": 92,
+      "urutan_UH": 2,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_guru1"
+    },
+    {
+      "id": "n17",
+      "siswa_id": "s8",
+      "mapel_id": "mp_mat",
+      "jenis": "UH",
+      "nilai": 65,
+      "urutan_UH": 2,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_guru1"
+    },
+    {
+      "id": "n18",
+      "siswa_id": "s9",
+      "mapel_id": "mp_mat",
+      "jenis": "UH",
+      "nilai": 82,
+      "urutan_UH": 2,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_guru1"
+    },
+    {
+      "id": "n19",
+      "siswa_id": "s1",
+      "mapel_id": "mp_mat",
+      "jenis": "UTS",
+      "nilai": 82,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_guru1"
+    },
+    {
+      "id": "n20",
+      "siswa_id": "s1",
+      "mapel_id": "mp_mat",
+      "jenis": "PAS",
+      "nilai": 80,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_guru1"
+    },
+    {
+      "id": "n21",
+      "siswa_id": "s1",
+      "mapel_id": "mp_ind",
+      "jenis": "UH",
+      "nilai": 90,
+      "urutan_UH": 1,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_admin"
+    },
+    {
+      "id": "n22",
+      "siswa_id": "s2",
+      "mapel_id": "mp_ind",
+      "jenis": "UH",
+      "nilai": 85,
+      "urutan_UH": 1,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_admin"
+    },
+    {
+      "id": "n23",
+      "siswa_id": "s3",
+      "mapel_id": "mp_ind",
+      "jenis": "UH",
+      "nilai": 88,
+      "urutan_UH": 1,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_admin"
+    },
+    {
+      "id": "n24",
+      "siswa_id": "s4",
+      "mapel_id": "mp_ind",
+      "jenis": "UH",
+      "nilai": 78,
+      "urutan_UH": 1,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_admin"
+    },
+    {
+      "id": "n25",
+      "siswa_id": "s5",
+      "mapel_id": "mp_ind",
+      "jenis": "UH",
+      "nilai": 82,
+      "urutan_UH": 1,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_admin"
+    },
+    {
+      "id": "n26",
+      "siswa_id": "s6",
+      "mapel_id": "mp_ind",
+      "jenis": "UH",
+      "nilai": 80,
+      "urutan_UH": 1,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_admin"
+    },
+    {
+      "id": "n27",
+      "siswa_id": "s7",
+      "mapel_id": "mp_ind",
+      "jenis": "UH",
+      "nilai": 90,
+      "urutan_UH": 1,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_admin"
+    },
+    {
+      "id": "n28",
+      "siswa_id": "s8",
+      "mapel_id": "mp_ind",
+      "jenis": "UH",
+      "nilai": 72,
+      "urutan_UH": 1,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_admin"
+    },
+    {
+      "id": "n29",
+      "siswa_id": "s9",
+      "mapel_id": "mp_ind",
+      "jenis": "UH",
+      "nilai": 85,
+      "urutan_UH": 1,
+      "semester": "Ganjil",
+      "tahun_ajaran": "2025/2026",
+      "input_oleh": "g_admin"
+    }
+  ]
+}
