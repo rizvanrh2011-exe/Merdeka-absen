@@ -407,9 +407,27 @@ if (typeof window !== "undefined") {
     if (url.includes("/api/")) {
       const isInitialDbCheck = url.endsWith("/api/db") && (!init || !init.method || init.method.toUpperCase() === "GET");
 
+      // Auto-inject Sekolah-Id header for multi-tenancy
+      let sekolahId = "default";
+      try {
+        const userJson = localStorage.getItem("user");
+        if (userJson) {
+          const userObj = JSON.parse(userJson);
+          sekolahId = userObj.sekolah_id || "default";
+        }
+      } catch (e) {}
+
+      // Modify init options to insert header
+      const modInit = init ? { ...init } : {};
+      const newHeaders = new Headers(modInit.headers || {});
+      if (!newHeaders.has("X-Sekolah-Id")) {
+        newHeaders.set("X-Sekolah-Id", sekolahId);
+      }
+      modInit.headers = newHeaders;
+
       if (getUseLocalFallback()) {
         try {
-          return await handleMockApi(url, init);
+          return await handleMockApi(url, modInit);
         } catch (err: any) {
           return new Response(JSON.stringify({ error: err.message }), {
             status: 400,
@@ -420,14 +438,14 @@ if (typeof window !== "undefined") {
 
       // If we haven't active fallback yet, do the real fetch
       try {
-        const response = await originalFetch.apply(this, arguments as any);
+        const response = await originalFetch.call(this, url, modInit);
 
         if (isInitialDbCheck) {
           const contentType = response.headers.get("content-type") || "";
           if (!response.ok || contentType.includes("text/html")) {
             console.warn("Real API is not available or returned HTML. Switching to LocalStorage Fallback.");
             setUseLocalFallback(true);
-            return await handleMockApi(url, init);
+            return await handleMockApi(url, modInit);
           }
 
           // Check if body content is HTML (common on static routes fallback)
@@ -436,7 +454,7 @@ if (typeof window !== "undefined") {
           if (text.trim().startsWith("<!DOCTYPE")) {
             console.warn("Real API returned HTML instead of JSON. Switching to LocalStorage Fallback.");
             setUseLocalFallback(true);
-            return await handleMockApi(url, init);
+            return await handleMockApi(url, modInit);
           }
         }
 
@@ -449,7 +467,7 @@ if (typeof window !== "undefined") {
             if (text.trim().startsWith("<!DOCTYPE")) {
               console.warn("Detected fallback HTML on API path. Switching to LocalStorage Fallback.");
               setUseLocalFallback(true);
-              return await handleMockApi(url, init);
+              return await handleMockApi(url, modInit);
             }
           }
         }
@@ -458,7 +476,7 @@ if (typeof window !== "undefined") {
       } catch (err) {
         console.warn("Network error fetching API. Switching to LocalStorage Fallback.", err);
         setUseLocalFallback(true);
-        return await handleMockApi(url, init);
+        return await handleMockApi(url, modInit);
       }
     }
 
@@ -469,11 +487,11 @@ if (typeof window !== "undefined") {
 // -------------------------------------------------------------
 // ORIGINAL API WRAPPERS (Automatic fallback via transparent fetch)
 // -------------------------------------------------------------
-export async function loginUser(username: string, password: string) {
+export async function loginUser(username: string, password: string, kode_sekolah?: string) {
   const res = await fetch(`${API_BASE}/api/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ username, password, kode_sekolah }),
   });
   
   let data: any = {};
@@ -486,7 +504,33 @@ export async function loginUser(username: string, password: string) {
   if (!res.ok) {
     throw new Error(data.error || "Login gagal");
   }
-  return data as { success: boolean; user: { id: string; nama: string; username: string; role: 'wali_kelas' | 'guru_mapel' } };
+  return data as { success: boolean; user: { id: string; nama: string; username: string; role: 'wali_kelas' | 'guru_mapel'; sekolah_id: string } };
+}
+
+export async function registerSekolah(payload: {
+  nama_sekolah: string;
+  kode_sekolah: string;
+  nama_admin: string;
+  username: string;
+  password: string;
+}) {
+  const res = await fetch(`${API_BASE}/api/register-sekolah`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  
+  let data: any = {};
+  try {
+    data = await res.json();
+  } catch (err) {
+    throw new Error("Gagal membaca respon pendaftaran.");
+  }
+
+  if (!res.ok) {
+    throw new Error(data.error || "Pendaftaran gagal");
+  }
+  return data as { success: boolean; sekolah_id: string };
 }
 
 export async function fetchDatabaseState(): Promise<DatabaseState> {

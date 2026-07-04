@@ -49,6 +49,7 @@ export default function App() {
 
   // Fetch server database state
   const loadDb = async () => {
+    if (!currentUser) return;
     setLoading(true);
     try {
       const state = await fetchDatabaseState();
@@ -63,8 +64,12 @@ export default function App() {
   };
 
   useEffect(() => {
-    loadDb();
-  }, []);
+    if (currentUser) {
+      loadDb();
+    } else {
+      setDb(null);
+    }
+  }, [currentUser]);
 
   const handleLoginSuccess = (user: any) => {
     setCurrentUser(user);
@@ -74,6 +79,7 @@ export default function App() {
   const handleLogout = () => {
     if (window.confirm("Apakah Anda yakin ingin keluar dari sistem?")) {
       setCurrentUser(null);
+      setDb(null);
       localStorage.removeItem("user");
       setActiveScreen("dashboard");
     }
