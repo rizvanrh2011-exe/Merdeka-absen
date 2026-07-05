@@ -1,5 +1,5 @@
 {
-  "name": "Administrasi Guru Merdeka",
+  "name": "Administrasi Guru Merdeka 41a933",
   "description": "Sistem administrasi guru terpadu Kurikulum Merdeka untuk mengelola master data siswa, presensi harian, nilai UH/UTS/PAS, dan cetak rapor semester.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

@@ -116,13 +116,17 @@ export default function DataMaster({ db, currentUser, onRefresh }: DataMasterPro
     setLoading(true);
     try {
       if (activeTab === "siswa") {
-        if (!siswaNama || !siswaNISN || !siswaKelas) throw new Error("Semua field harus diisi!");
+        const finalKelas = siswaKelas || (db.kelas[0]?.id || "");
+        const finalGender = siswaGender || "L";
+        if (!siswaNama.trim() || !siswaNISN.trim() || !finalKelas) {
+          throw new Error("Semua field (Nama, NISN, Kelas, Jenis Kelamin) harus diisi!");
+        }
         const payload: Siswa = {
           id: editingId || "",
-          nama: siswaNama,
-          NISN: siswaNISN,
-          kelas_id: siswaKelas,
-          jenis_kelamin: siswaGender,
+          nama: siswaNama.trim(),
+          NISN: siswaNISN.trim(),
+          kelas_id: finalKelas,
+          jenis_kelamin: finalGender,
           dibuat_oleh: currentUser?.id || "g_admin",
         };
         const res = await fetch("/api/siswa", {
