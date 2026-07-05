@@ -19,8 +19,27 @@ export default function AbsensiEditor({ db, currentUser, onRefresh }: AbsensiEdi
   // Active inputs state
   const [tempAbsensi, setTempAbsensi] = useState<{ [siswa_id: string]: StatusAbsensi }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [viewMode, setViewMode] = useState<"input" | "rekap">("input");
+  const [viewMode, setViewMode] = useState<"input" | "rekap" | "rekap-bulanan">("input");
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+
+  const months = [
+    { value: 1, label: "Januari" },
+    { value: 2, label: "Februari" },
+    { value: 3, label: "Maret" },
+    { value: 4, label: "April" },
+    { value: 5, label: "Mei" },
+    { value: 6, label: "Juni" },
+    { value: 7, label: "Juli" },
+    { value: 8, label: "Agustus" },
+    { value: 9, label: "September" },
+    { value: 10, label: "Oktober" },
+    { value: 11, label: "November" },
+    { value: 12, label: "Desember" },
+  ];
+
+  const today = new Date();
+  const [selectedMonth, setSelectedMonth] = useState<number>(today.getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState<number>(today.getFullYear());
 
   const selectedKelas = db.kelas.find((k) => k.id === selectedKelasId);
   const filteredSiswa = db.siswa.filter((s) => s.kelas_id === selectedKelasId);
@@ -134,6 +153,99 @@ export default function AbsensiEditor({ db, currentUser, onRefresh }: AbsensiEdi
     document.body.removeChild(link);
   };
 
+  // Monthly Rekap summary calculator
+  const monthlyRekapData = filteredSiswa.map((s) => {
+    const studentAbsensi = db.absensi.filter((a) => {
+      if (a.siswa_id !== s.id) return false;
+      const [yearStr, monthStr] = a.tanggal.split("-");
+      return Number(yearStr) === selectedYear && Number(monthStr) === selectedMonth;
+    });
+
+    const statusByDay: { [day: number]: StatusAbsensi } = {};
+    const counts = {
+      Hadir: 0,
+      Sakit: 0,
+      Izin: 0,
+      Alpa: 0,
+    };
+
+    studentAbsensi.forEach((a) => {
+      const parts = a.tanggal.split("-");
+      if (parts.length === 3) {
+        const dayNum = Number(parts[2]);
+        statusByDay[dayNum] = a.status;
+        if (a.status in counts) {
+          counts[a.status]++;
+        }
+      }
+    });
+
+    const totalDays = counts.Hadir + counts.Sakit + counts.Izin + counts.Alpa;
+    const kehadiranPersen = totalDays > 0 ? Math.round((counts.Hadir / totalDays) * 100) : 100;
+
+    return {
+      siswa: s,
+      statusByDay,
+      counts,
+      kehadiranPersen,
+    };
+  });
+
+  // Export Monthly spreadsheet as CSV
+  const handleExportMonthlyCSV = () => {
+    const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+    const headers = [
+      "No",
+      "Nama Siswa",
+      "NISN",
+      ...Array.from({ length: daysInMonth }, (_, i) => String(i + 1)),
+      "Hadir (H)",
+      "Sakit (S)",
+      "Izin (I)",
+      "Alpa (A)",
+      "% Kehadiran"
+    ];
+
+    const rows = monthlyRekapData.map((r, idx) => {
+      const dayStatuses = Array.from({ length: daysInMonth }, (_, i) => {
+        const d = i + 1;
+        const status = r.statusByDay[d];
+        if (!status) return "-";
+        if (status === "Hadir") return "H";
+        if (status === "Sakit") return "S";
+        if (status === "Izin") return "I";
+        if (status === "Alpa") return "A";
+        return "-";
+      });
+
+      return [
+        idx + 1,
+        r.siswa.nama,
+        `'${r.siswa.NISN}`,
+        ...dayStatuses,
+        r.counts.Hadir,
+        r.counts.Sakit,
+        r.counts.Izin,
+        r.counts.Alpa,
+        `${r.kehadiranPersen}%`
+      ];
+    });
+
+    const csvContent =
+      "\uFEFF" + // UTF-8 BOM so Excel opens indonesian characters correctly
+      [headers.join(","), ...rows.map((row) => row.map((val) => `"${val}"`).join(","))].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const monthName = months.find(m => m.value === selectedMonth)?.label || "Bulan";
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Rekap_Bulanan_${selectedKelas?.nama_kelas || "Kelas"}_${monthName}_${selectedYear}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="space-y-6">
       {/* Title block */}
@@ -146,7 +258,7 @@ export default function AbsensiEditor({ db, currentUser, onRefresh }: AbsensiEdi
         </div>
 
         {/* Mode Selector */}
-        <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
+        <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200 flex-wrap gap-1">
           <button
             onClick={() => setViewMode("input")}
             className={`px-4 py-2 text-xs font-bold rounded-md transition-all ${
@@ -156,12 +268,20 @@ export default function AbsensiEditor({ db, currentUser, onRefresh }: AbsensiEdi
             Input Presensi Harian
           </button>
           <button
+            onClick={() => setViewMode("rekap-bulanan")}
+            className={`px-4 py-2 text-xs font-bold rounded-md transition-all ${
+              viewMode === "rekap-bulanan" ? "bg-green-700 text-white shadow-sm" : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            Rekap Bulanan
+          </button>
+          <button
             onClick={() => setViewMode("rekap")}
             className={`px-4 py-2 text-xs font-bold rounded-md transition-all ${
               viewMode === "rekap" ? "bg-green-700 text-white shadow-sm" : "text-slate-600 hover:text-slate-900"
             }`}
           >
-            Rekap Kehadiran Semester
+            Rekap Semester
           </button>
         </div>
       </div>
@@ -193,6 +313,39 @@ export default function AbsensiEditor({ db, currentUser, onRefresh }: AbsensiEdi
               ))}
             </select>
           </div>
+
+          {viewMode === "rekap-bulanan" && (
+            <>
+              <div className="flex-1">
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Pilih Bulan</label>
+                <select
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm font-semibold rounded-lg px-3 py-2.5 outline-none focus:border-green-600 focus:bg-white transition"
+                >
+                  {months.map((m) => (
+                    <option key={m.value} value={m.value}>
+                      {m.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="w-32">
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Pilih Tahun</label>
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(Number(e.target.value))}
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm font-semibold rounded-lg px-3 py-2.5 outline-none focus:border-green-600 focus:bg-white transition font-mono"
+                >
+                  {[2024, 2025, 2026, 2027, 2028].map((y) => (
+                    <option key={y} value={y}>
+                      {y}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </>
+          )}
 
           {viewMode === "input" && (
             <div className="flex-1">
@@ -372,6 +525,128 @@ export default function AbsensiEditor({ db, currentUser, onRefresh }: AbsensiEdi
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* VIEW 3: MONTHLY REKAP GRID */}
+      {viewMode === "rekap-bulanan" && (
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="bg-slate-50 p-4 border-b border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm font-bold text-slate-800">
+                Laporan Kehadiran Bulanan: {months.find((m) => m.value === selectedMonth)?.label} {selectedYear}
+              </span>
+            </div>
+            <button
+              onClick={handleExportMonthlyCSV}
+              className="flex items-center gap-1.5 bg-green-700 hover:bg-green-800 text-white text-xs font-bold py-2.5 px-4 rounded-lg shadow-sm transition"
+            >
+              <FileSpreadsheet className="w-4 h-4" /> Export Bulanan ke Excel (CSV)
+            </button>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="border-b border-slate-200 text-slate-400 font-bold bg-slate-50/50">
+                  <th className="py-3 px-4 border-r border-slate-200">No</th>
+                  <th className="py-3 px-4 border-r border-slate-200 min-w-[150px]">Nama Siswa</th>
+                  <th className="py-3 px-3 border-r border-slate-200">NISN</th>
+                  {Array.from({ length: new Date(selectedYear, selectedMonth, 0).getDate() }, (_, i) => i + 1).map((day) => (
+                    <th key={day} className="py-3 px-1 text-center border-r border-slate-200 min-w-[28px] max-w-[32px]">
+                      {day}
+                    </th>
+                  ))}
+                  <th className="py-3 px-2 text-center border-r border-slate-200 bg-green-50/50 text-green-800">H</th>
+                  <th className="py-3 px-2 text-center border-r border-slate-200 bg-sky-50/50 text-sky-850">S</th>
+                  <th className="py-3 px-2 text-center border-r border-slate-200 bg-amber-50/50 text-amber-800">I</th>
+                  <th className="py-3 px-2 text-center border-r border-slate-200 bg-rose-50/50 text-rose-800">A</th>
+                  <th className="py-3 px-3 text-center">%</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-slate-700">
+                {monthlyRekapData.length === 0 ? (
+                  <tr>
+                    <td colSpan={3 + 31 + 5} className="py-8 text-center text-slate-400 font-semibold">
+                      Belum ada siswa terdaftar.
+                    </td>
+                  </tr>
+                ) : (
+                  monthlyRekapData.map((row, idx) => {
+                    const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+                    return (
+                      <tr key={row.siswa.id} className="hover:bg-slate-50/30 transition">
+                        <td className="py-2.5 px-4 font-mono border-r border-slate-100">{idx + 1}</td>
+                        <td className="py-2.5 px-4 font-bold text-slate-900 border-r border-slate-100 min-w-[150px]">{row.siswa.nama}</td>
+                        <td className="py-2.5 px-3 font-mono text-slate-400 border-r border-slate-100">{row.siswa.NISN}</td>
+                        {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
+                          const status = row.statusByDay[day];
+                          let badgeClass = "text-slate-300 font-normal";
+                          let displayText = "-";
+
+                          if (status === "Hadir") {
+                            badgeClass = "bg-green-100 text-green-800 font-bold rounded";
+                            displayText = "H";
+                          } else if (status === "Sakit") {
+                            badgeClass = "bg-sky-100 text-sky-800 font-bold rounded";
+                            displayText = "S";
+                          } else if (status === "Izin") {
+                            badgeClass = "bg-amber-100 text-amber-800 font-bold rounded";
+                            displayText = "I";
+                          } else if (status === "Alpa") {
+                            badgeClass = "bg-rose-100 text-rose-800 font-bold rounded";
+                            displayText = "A";
+                          }
+
+                          return (
+                            <td key={day} className="py-2 px-0.5 text-center border-r border-slate-100 font-mono">
+                              <div className={`w-5 h-5 mx-auto flex items-center justify-center text-[10px] ${badgeClass}`}>
+                                {displayText}
+                              </div>
+                            </td>
+                          );
+                        })}
+                        <td className="py-2.5 px-2 text-center text-green-700 font-bold border-r border-slate-100 bg-green-50/10">{row.counts.Hadir}</td>
+                        <td className="py-2.5 px-2 text-center text-sky-600 font-bold border-r border-slate-100 bg-sky-50/10">{row.counts.Sakit}</td>
+                        <td className="py-2.5 px-2 text-center text-amber-500 font-bold border-r border-slate-100 bg-amber-50/10">{row.counts.Izin}</td>
+                        <td className="py-2.5 px-2 text-center text-rose-600 font-bold border-r border-slate-100 bg-rose-50/10">{row.counts.Alpa}</td>
+                        <td className="py-2.5 px-3 text-center">
+                          <span
+                            className={`px-1.5 py-0.5 rounded font-bold text-[10px] ${
+                              row.kehadiranPersen >= 90
+                                ? "bg-green-50 text-green-800"
+                                : row.kehadiranPersen >= 75
+                                ? "bg-amber-50 text-amber-700"
+                                : "bg-rose-50 text-rose-800"
+                            }`}
+                          >
+                            {row.kehadiranPersen}%
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+          <div className="p-4 bg-slate-50 border-t border-slate-200 flex flex-wrap gap-4 text-xs text-slate-500">
+            <span className="flex items-center gap-1">
+              <span className="w-4 h-4 bg-green-100 border border-green-200 rounded flex items-center justify-center font-bold text-[9px] text-green-800">H</span> Hadir
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-4 h-4 bg-sky-100 border border-sky-200 rounded flex items-center justify-center font-bold text-[9px] text-sky-800">S</span> Sakit
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-4 h-4 bg-amber-100 border border-amber-200 rounded flex items-center justify-center font-bold text-[9px] text-amber-800">I</span> Izin
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-4 h-4 bg-rose-100 border border-rose-200 rounded flex items-center justify-center font-bold text-[9px] text-rose-800">A</span> Alpa
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="font-mono text-slate-300">-</span> Belum ada data
+            </span>
           </div>
         </div>
       )}
